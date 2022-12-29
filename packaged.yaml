@@ -1,0 +1,131 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: An AWS Serverless Specification template describing your function.
+Parameters:
+  StageName:
+    Type: String
+  CicdBucket:
+    Type: String
+Resources:
+  DefaultApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: live
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location:
+              Fn::Sub: s3://${CicdBucket}/spec/api-spec.yaml
+    Metadata:
+      SamResourceId: DefaultApi
+  FindSongsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.handler.find_by_author_and_title
+      Runtime: python3.7
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: Table
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: DefaultApi
+            Path: /songs
+            Method: GET
+      Environment:
+        Variables:
+          TABLE_NAME:
+            Ref: Table
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/b61f38dff8b88bddd73d5313fb9dd937
+    Metadata:
+      SamResourceId: FindSongsFunction
+  CreateSongFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.handler.create_song
+      Runtime: python3.7
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: Table
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: DefaultApi
+            Path: /songs
+            Method: POST
+      Environment:
+        Variables:
+          TABLE_NAME:
+            Ref: Table
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/b61f38dff8b88bddd73d5313fb9dd937
+    Metadata:
+      SamResourceId: CreateSongFunction
+  DeleteSongFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.handler.delete_song
+      Runtime: python3.7
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: Table
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: DefaultApi
+            Path: /songs/{song_id}
+            Method: DELETE
+      Environment:
+        Variables:
+          TABLE_NAME:
+            Ref: Table
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/b61f38dff8b88bddd73d5313fb9dd937
+    Metadata:
+      SamResourceId: DeleteSongFunction
+  Table:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName:
+        Fn::Sub: awesomecms-${StageName}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+      - AttributeName: uuid
+        AttributeType: S
+      - AttributeName: author
+        AttributeType: S
+      - AttributeName: date
+        AttributeType: S
+      - AttributeName: title
+        AttributeType: S
+      KeySchema:
+      - AttributeName: author
+        KeyType: HASH
+      - AttributeName: title
+        KeyType: RANGE
+      LocalSecondaryIndexes:
+      - IndexName: author-date
+        KeySchema:
+        - AttributeName: author
+          KeyType: HASH
+        - AttributeName: date
+          KeyType: RANGE
+        Projection:
+          ProjectionType: ALL
+      GlobalSecondaryIndexes:
+      - IndexName: uuid
+        KeySchema:
+        - AttributeName: uuid
+          KeyType: HASH
+        Projection:
+          ProjectionType: ALL
+    Metadata:
+      SamResourceId: Table

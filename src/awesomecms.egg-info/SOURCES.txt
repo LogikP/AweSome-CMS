@@ -1,0 +1,16 @@
+AUTHORS.rst
+LICENSE.txt
+README.md
+setup.cfg
+setup.py
+src/awesomecms.egg-info/PKG-INFO
+src/awesomecms.egg-info/SOURCES.txt
+src/awesomecms.egg-info/dependency_links.txt
+src/awesomecms.egg-info/not-zip-safe
+src/awesomecms.egg-info/requires.txt
+src/awesomecms.egg-info/top_level.txt
+src/core/__init__.py
+src/core/resources_mgr.py
+src/domain/__init__.py
+src/domain/song.py
+src/domain/song_dao.py
