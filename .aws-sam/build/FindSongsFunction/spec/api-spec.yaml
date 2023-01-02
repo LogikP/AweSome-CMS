@@ -5,25 +5,48 @@ info:
 
 
 servers:
-  - url: "https://{api_id}.execute-api.eu-west-3.amazonaws.com/live"
+  - url: "https://api.awesomecms.link"
     variables:
       api_id:
         default: api_id
         description: set api id
 
 paths:
-  /songs:
+  /users/signup:
+    post:
+      summary: "User Registration"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        201:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      security:
+        - sigv4: [ ]
+      x-amazon-apigateway-request-validator: validate_request
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: 201
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SignUpFunction.Arn}/invocations"
+        passthroughBehavior: when_no_match
+        httpMethod: POST
+        type: aws_proxy
+
+  /articles:
     get:
-      summary: "Find song by author and title"
+      summary: "Find article by tag"
       parameters:
         - in: query
-          name: author
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: title
-          required: true
+          name: tag
+          required: false
           schema:
             type: string
       responses:
@@ -32,7 +55,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Song"
+                $ref: "#/components/schemas/ArticleList"
       security:
         - sigv4: [ ]
       x-amazon-apigateway-integration:
@@ -45,19 +68,19 @@ paths:
         httpMethod: POST
         type: aws_proxy
     post:
-      summary: "Create a song"
+      summary: "Create an article"
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Song"
+              $ref: "#/components/schemas/Article"
       responses:
         201:
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Song"
+                $ref: "#/components/schemas/Article"
       security:
         - sigv4: [ ]
       x-amazon-apigateway-request-validator: validate_request
@@ -66,16 +89,17 @@ paths:
           default:
             statusCode: 201
         uri:
-          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateSongFunction.Arn}/invocations"
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateArticleFunction.Arn}/invocations"
         passthroughBehavior: when_no_match
         httpMethod: POST
         type: aws_proxy
-  /songs/{song_id}:
+        
+  /articles/{article_id}:
     delete:
-      summary: "Delete a song"
+      summary: "Delete an article"
       parameters:
         - in: path
-          name: song_id
+          name: article_id
           required: true
           schema:
             type: string
@@ -100,22 +124,39 @@ paths:
 
 components:
   schemas:
-    SongList:
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+    ArticleList:
       type: array
       items:
-        $ref: '#/components/schemas/Song'
-    Song:
+        $ref: '#/components/schemas/Article'
+    Article:
       type: object
       properties:
         id:
           type: string
-        author:
-          type: string
         title:
           type: string
-        genre:
+        tags:
+          type: array
+          items:
+            type: string
+        authorId:
+          type: number
+        content:
           type: string
-        date:
+        created_at:
+          type: string
+        updated_at:
           type: string
     Empty:
       type: object

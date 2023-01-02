@@ -10,6 +10,10 @@ Resources:
   DefaultApi:
     Type: AWS::Serverless::Api
     Properties:
+      GatewayResponses:
+        BAD_REQUEST_BODY:
+          ResponseTemplates:
+            application/json: '{ "message": "$context.error.validationErrorString"}'
       StageName: live
       DefinitionBody:
         Fn::Transform:
@@ -25,7 +29,7 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Ref: Table
+            Ref: ArticleTable
       Events:
         ApiEvent:
           Type: Api
@@ -37,34 +41,50 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME:
-            Ref: Table
+            Ref: ArticleTable
       CodeUri: FindSongsFunction
     Metadata:
       SamResourceId: FindSongsFunction
-  CreateSongFunction:
+  SignUpFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src.handler.create_song
+      Handler: src.auth.signup.lamda_handler
       Runtime: python3.7
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: Table
       Events:
         ApiEvent:
           Type: Api
           Properties:
             RestApiId:
               Ref: DefaultApi
-            Path: /songs
+            Path: /users/signup
+            Method: POST
+      CodeUri: SignUpFunction
+    Metadata:
+      SamResourceId: SignUpFunction
+  CreateArticleFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.handler.create_article
+      Runtime: python3.7
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: ArticleTable
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: DefaultApi
+            Path: /articles
             Method: POST
       Environment:
         Variables:
           TABLE_NAME:
-            Ref: Table
-      CodeUri: CreateSongFunction
+            Ref: ArticleTable
+      CodeUri: CreateArticleFunction
     Metadata:
-      SamResourceId: CreateSongFunction
+      SamResourceId: CreateArticleFunction
   DeleteSongFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -73,7 +93,7 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
-            Ref: Table
+            Ref: ArticleTable
       Events:
         ApiEvent:
           Type: Api
@@ -85,11 +105,11 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME:
-            Ref: Table
+            Ref: ArticleTable
       CodeUri: DeleteSongFunction
     Metadata:
       SamResourceId: DeleteSongFunction
-  Table:
+  ArticleTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName:

@@ -15,6 +15,10 @@ Resources:
   DefaultApi:
     Type: AWS::Serverless::Api
     Properties:
+      GatewayResponses:
+        BAD_REQUEST_BODY:
+          ResponseTemplates:
+            "application/json": '{ "message": "$context.error.validationErrorString"}'
       StageName: live
       DefinitionBody:
         'Fn::Transform':
@@ -35,7 +39,7 @@ Resources:
       # Droits IAM affectés à la l'exécution de la lambda
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref Table
+            TableName: !Ref ArticleTable
       Events:
         ApiEvent:
           Type: Api
@@ -46,26 +50,42 @@ Resources:
       # Variables d'environnement
       Environment:
         Variables:
-          TABLE_NAME: !Ref Table
-
-  CreateSongFunction:
+          TABLE_NAME: !Ref ArticleTable
+          
+          
+  SignUpFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src.handler.create_song
+      Handler: src.auth.signup.lamda_handler
       Runtime: python3.7
-      Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref Table
       Events:
         ApiEvent:
           Type: Api
           Properties:
             RestApiId: !Ref DefaultApi
-            Path: /songs
+            Path: /users/signup
+            Method: POST
+
+
+
+  CreateArticleFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.handler.create_article
+      Runtime: python3.7
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ArticleTable
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref DefaultApi
+            Path: /articles
             Method: POST
       Environment:
         Variables:
-          TABLE_NAME: !Ref Table
+          TABLE_NAME: !Ref ArticleTable
 
   DeleteSongFunction:
     Type: AWS::Serverless::Function
@@ -74,7 +94,7 @@ Resources:
       Runtime: python3.7
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref Table
+            TableName: !Ref ArticleTable
       Events:
         ApiEvent:
           Type: Api
@@ -84,9 +104,9 @@ Resources:
             Method: DELETE
       Environment:
         Variables:
-          TABLE_NAME: !Ref Table
+          TABLE_NAME: !Ref ArticleTable
   
-  Table:
+  ArticleTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: !Sub "awesomecms-${StageName}"

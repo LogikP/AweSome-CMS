@@ -8,6 +8,6 @@ architecture = "x86_64"
 handler = "src.handler.find_by_author_and_title"
 manifest_hash = ""
 packagetype = "Zip"
-functions = ["FindSongsFunction", "CreateSongFunction", "DeleteSongFunction"]
+functions = ["FindSongsFunction", "SignUpFunction", "CreateArticleFunction", "DeleteSongFunction"]
 
 [layer_build_definitions]
