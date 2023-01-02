@@ -27,8 +27,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-        - sigv4: [ ]
       x-amazon-apigateway-request-validator: validate_request
       x-amazon-apigateway-integration:
         responses:
@@ -39,7 +37,59 @@ paths:
         passthroughBehavior: when_no_match
         httpMethod: POST
         type: aws_proxy
-
+        
+  /users/confirmeAccount:
+    post:
+      summary: "User Confirm Account"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Confirm"
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-request-validator: validate_request
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: 200
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ConfirmedSignUpFunction.Arn}/invocations"
+        passthroughBehavior: when_no_match
+        httpMethod: POST
+        type: aws_proxy
+        
+  /users/signin:
+    post:
+      summary: "User Registration"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignIn"
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-request-validator: validate_request
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: 200
+        uri:
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SignInFunction.Arn}/invocations"
+        passthroughBehavior: when_no_match
+        httpMethod: POST
+        type: aws_proxy
+        
   /articles:
     get:
       summary: "Find article by tag"
@@ -129,9 +179,23 @@ components:
       properties:
         username:
           type: string
-        name:
-          type: string
         email:
+          type: string
+        password:
+          type: string
+    Confirm:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        code:
+          type: string
+    SignIn:
+      type: object
+      properties:
+        username:
           type: string
         password:
           type: string

@@ -44,13 +44,13 @@ Resources:
         Variables:
           TABLE_NAME:
             Ref: ArticleTable
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/8f8f30d118305169da0186c494f77d8e
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/92fac7d742d7898b9adbea14eda79a68
     Metadata:
       SamResourceId: FindSongsFunction
   SignUpFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src.auth.signup.lamda_handler
+      Handler: src.handler.signup
       Runtime: python3.7
       Events:
         ApiEvent:
@@ -60,9 +60,41 @@ Resources:
               Ref: DefaultApi
             Path: /users/signup
             Method: POST
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/8f8f30d118305169da0186c494f77d8e
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/92fac7d742d7898b9adbea14eda79a68
     Metadata:
       SamResourceId: SignUpFunction
+  ConfirmedSignUpFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.handler.confirm_signup
+      Runtime: python3.7
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: DefaultApi
+            Path: /users/confirmeAccount
+            Method: POST
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/92fac7d742d7898b9adbea14eda79a68
+    Metadata:
+      SamResourceId: ConfirmedSignUpFunction
+  SignInFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.handler.signin
+      Runtime: python3.7
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: DefaultApi
+            Path: /users/signin
+            Method: POST
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/92fac7d742d7898b9adbea14eda79a68
+    Metadata:
+      SamResourceId: SignInFunction
   CreateArticleFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -84,7 +116,7 @@ Resources:
         Variables:
           TABLE_NAME:
             Ref: ArticleTable
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/8f8f30d118305169da0186c494f77d8e
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/92fac7d742d7898b9adbea14eda79a68
     Metadata:
       SamResourceId: CreateArticleFunction
   DeleteSongFunction:
@@ -108,7 +140,7 @@ Resources:
         Variables:
           TABLE_NAME:
             Ref: ArticleTable
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/8f8f30d118305169da0186c494f77d8e
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/92fac7d742d7898b9adbea14eda79a68
     Metadata:
       SamResourceId: DeleteSongFunction
   ArticleTable:

@@ -11,9 +11,9 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       GatewayResponses:
-        BAD_REQUEST_BODY: null
-        ResponseTemplates:
-          application/json: '{ "message": "$context.error.validationErrorString"}'
+        BAD_REQUEST_BODY:
+          ResponseTemplates:
+            application/json: '{ "message": "$context.error.validationErrorString"}'
       StageName: live
       DefinitionBody:
         Fn::Transform:
@@ -44,13 +44,13 @@ Resources:
         Variables:
           TABLE_NAME:
             Ref: ArticleTable
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/96ca70eceb3f0603ace8f9b3da9aee11
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/c292a7f159b807c52caa3ef08269eb4b
     Metadata:
       SamResourceId: FindSongsFunction
   SignUpFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src.auth.signup.lamda_handler
+      Handler: src.handler.signup
       Runtime: python3.7
       Events:
         ApiEvent:
@@ -60,9 +60,41 @@ Resources:
               Ref: DefaultApi
             Path: /users/signup
             Method: POST
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/96ca70eceb3f0603ace8f9b3da9aee11
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/c292a7f159b807c52caa3ef08269eb4b
     Metadata:
       SamResourceId: SignUpFunction
+  ConfirmedSignUpFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.handler.confirm_signup
+      Runtime: python3.7
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: DefaultApi
+            Path: /users/confirmeAccount
+            Method: POST
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/c292a7f159b807c52caa3ef08269eb4b
+    Metadata:
+      SamResourceId: ConfirmedSignUpFunction
+  SignInFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.handler.signin
+      Runtime: python3.7
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: DefaultApi
+            Path: /users/signin
+            Method: POST
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/c292a7f159b807c52caa3ef08269eb4b
+    Metadata:
+      SamResourceId: SignInFunction
   CreateArticleFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -84,7 +116,7 @@ Resources:
         Variables:
           TABLE_NAME:
             Ref: ArticleTable
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/96ca70eceb3f0603ace8f9b3da9aee11
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/c292a7f159b807c52caa3ef08269eb4b
     Metadata:
       SamResourceId: CreateArticleFunction
   DeleteSongFunction:
@@ -108,7 +140,7 @@ Resources:
         Variables:
           TABLE_NAME:
             Ref: ArticleTable
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/96ca70eceb3f0603ace8f9b3da9aee11
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/c292a7f159b807c52caa3ef08269eb4b
     Metadata:
       SamResourceId: DeleteSongFunction
   ArticleTable:

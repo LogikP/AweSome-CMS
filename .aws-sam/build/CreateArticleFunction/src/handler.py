@@ -1,6 +1,9 @@
 from src.domain.article import Article
 from src.domain.article_dao import ArticleDao
 from src.core.resources_mgr import ResourcesMgr
+from src.domain.signup import lambda_handler
+from src.domain.confirm_signup import confirm_signup_function
+from src.domain.signin import signin_function
 
 import logging
 import json
@@ -68,3 +71,13 @@ def get_by_uuid(event, context):
         "headers": {"Content-Type": "application/json"},
         "body": json.dumps(entities, default=lambda entity: entity.to_json()),
     }
+
+
+def signup(event, context):
+    return lambda_handler(json.loads(event["body"]))
+
+def confirm_signup(event, context):
+    return confirm_signup_function(json.loads(event["body"]))
+
+def signin(event, context):
+    return signin_function(json.loads(event["body"]))

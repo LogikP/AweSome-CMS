@@ -48,7 +48,7 @@ Resources:
   SignUpFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src.auth.signup.lamda_handler
+      Handler: src.handler.signup
       Runtime: python3.7
       Events:
         ApiEvent:
@@ -61,6 +61,38 @@ Resources:
       CodeUri: SignUpFunction
     Metadata:
       SamResourceId: SignUpFunction
+  ConfirmedSignUpFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.handler.confirm_signup
+      Runtime: python3.7
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: DefaultApi
+            Path: /users/confirmeAccount
+            Method: POST
+      CodeUri: ConfirmedSignUpFunction
+    Metadata:
+      SamResourceId: ConfirmedSignUpFunction
+  SignInFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.handler.signin
+      Runtime: python3.7
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: DefaultApi
+            Path: /users/signin
+            Method: POST
+      CodeUri: SignInFunction
+    Metadata:
+      SamResourceId: SignInFunction
   CreateArticleFunction:
     Type: AWS::Serverless::Function
     Properties:
