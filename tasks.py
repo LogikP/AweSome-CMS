@@ -37,16 +37,16 @@ def stack_build(ctx):
 
 
 @task(pre=[stack_build])
-def stack_deploy(ctx, cicd_bucket, stage):
+def stack_deploy(ctx):
     with ctx.prefix(_activate()):
-        ctx.run(f"aws s3 cp spec/api-spec.yaml s3://{cicd_bucket}/spec/api-spec.yaml")
-        ctx.run(f"sam package --s3-bucket {cicd_bucket} --output-template-file packaged.yaml")
+        ctx.run(f"aws s3 cp spec/api-spec.yaml s3://s3-eu-west-1-cicd-awesomecs/spec/api-spec.yaml")
+        ctx.run(f"sam package --s3-bucket s3-eu-west-1-cicd-awesomecs --output-template-file packaged.yaml")
         ctx.run(f"sam deploy packaged.yaml "
                 f"--capabilities CAPABILITY_IAM "
                 f"--parameter-overrides "
-                f"StageName={stage} CicdBucket={cicd_bucket} "
-                f"--s3-bucket {cicd_bucket} "
-                f"--stack-name {_project_name()}-{stage} "
+                f"StageName=awesomecms CicdBucket=s3-eu-west-1-cicd-awesomecs "
+                f"--s3-bucket s3-eu-west-1-cicd-awesomecs "
+                f"--stack-name {_project_name()}-awesomecms "
                 f"--region {_aws_region()} ")
 
 
