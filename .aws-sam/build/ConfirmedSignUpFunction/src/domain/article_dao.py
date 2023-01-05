@@ -30,26 +30,16 @@ class ArticleDao:
 
         return None
 
-    def get_by_uuid(self, uuid) -> Article:
-        logger.info("[entity] entity")
-
-        result = self.table.query(
-            IndexName="uuid",
-            KeyConditionExpression=Key("uuid").eq(uuid),
-        )
-
-        if "Items" not in result:
-            return None
-
-        return result["Items"][0] if len(result["Items"]) == 1 else None
-
     def find_by_tag(self, tag):
         logging.info("[article] find_by_tag")
 
-        result = self.table.query(
-            IndexName="tags",
-            KeyConditionExpression=Key("tags").eq(tag),
-        )
+        if tag:
+            result = self.table.query(
+                IndexName="tags",
+                KeyConditionExpression=Key("tags").eq(tag),
+            )
+        else:
+            result = self.table.scan()
 
         print(result)
 

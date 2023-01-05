@@ -27,32 +27,6 @@ Resources:
             # Chemin vers la spec OpenAPI
             Location: !Sub "s3://${CicdBucket}/spec/api-spec.yaml"
 
-  # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
-  FindSongsFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      # Chemin du handler de la lambda
-      Handler: src.handler.find_by_author_and_title
-      # Runtime utilisé pour l'exécution de la lambda
-      Runtime: python3.7
-      # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-templates.html
-      # Droits IAM affectés à la l'exécution de la lambda
-      Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref ArticleTable
-      Events:
-        ApiEvent:
-          Type: Api
-          Properties:
-            RestApiId: !Ref DefaultApi
-            Path: /songs
-            Method: GET
-      # Variables d'environnement
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref ArticleTable
-          
-          
   SignUpFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -111,10 +85,35 @@ Resources:
         Variables:
           TABLE_NAME: !Ref ArticleTable
 
-  DeleteSongFunction:
+  # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+  FindArticlesFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src.handler.delete_song
+      # Chemin du handler de la lambda
+      Handler: src.handler.find_articles
+      # Runtime utilisé pour l'exécution de la lambda
+      Runtime: python3.7
+      # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-templates.html
+      # Droits IAM affectés à la l'exécution de la lambda
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ArticleTable
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref DefaultApi
+            Path: /articles
+            Method: GET
+      # Variables d'environnement
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref ArticleTable
+
+  DeleteArticleFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.handler.delete_article
       Runtime: python3.7
       Policies:
         - DynamoDBCrudPolicy:
@@ -124,7 +123,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref DefaultApi
-            Path: /songs/{song_id}
+            Path: /articles/{article_id}
             Method: DELETE
       Environment:
         Variables:
@@ -133,35 +132,11 @@ Resources:
   ArticleTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub "awesomecms-${StageName}"
+      TableName: !Sub "articles-${StageName}"
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: uuid
           AttributeType: S
-        - AttributeName: author
-          AttributeType: S
-        - AttributeName: date
-          AttributeType: S
-        - AttributeName: title
-          AttributeType: S
       KeySchema:
-        - AttributeName: author
+        - AttributeName: uuid
           KeyType: HASH
-        - AttributeName: title
-          KeyType: RANGE
-      LocalSecondaryIndexes:
-        - IndexName: author-date
-          KeySchema:
-            - AttributeName: author
-              KeyType: HASH
-            - AttributeName: date
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-      GlobalSecondaryIndexes:
-        - IndexName: uuid
-          KeySchema:
-            - AttributeName: uuid
-              KeyType: HASH
-          Projection:
-            ProjectionType: ALL

@@ -106,14 +106,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ArticleList"
-      security:
-        - sigv4: [ ]
       x-amazon-apigateway-integration:
         responses:
           default:
             statusCode: 200
         uri:
-          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${FindSongsFunction.Arn}/invocations"
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${FindArticlesFunction.Arn}/invocations"
         passthroughBehavior: when_no_match
         httpMethod: POST
         type: aws_proxy
@@ -131,8 +129,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Article"
-      security:
-        - sigv4: [ ]
       x-amazon-apigateway-request-validator: validate_request
       x-amazon-apigateway-integration:
         responses:
@@ -160,14 +156,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Empty"
-      security:
-        - sigv4: [ ]
       x-amazon-apigateway-integration:
         responses:
           default:
             statusCode: 204
         uri:
-          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteSongFunction.Arn}/invocations"
+          Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteArticleFunction.Arn}/invocations"
         passthroughBehavior: when_no_match
         httpMethod: POST
         type: aws_proxy

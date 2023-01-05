@@ -21,30 +21,6 @@ Resources:
           Parameters:
             Location:
               Fn::Sub: s3://${CicdBucket}/spec/api-spec.yaml
-  FindSongsFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: src.handler.find_by_author_and_title
-      Runtime: python3.7
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: ArticleTable
-      Events:
-        ApiEvent:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: DefaultApi
-            Path: /songs
-            Method: GET
-      Environment:
-        Variables:
-          TABLE_NAME:
-            Ref: ArticleTable
-      CodeUri: FindSongsFunction
-    Metadata:
-      SamResourceId: FindSongsFunction
   SignUpFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -117,10 +93,10 @@ Resources:
       CodeUri: CreateArticleFunction
     Metadata:
       SamResourceId: CreateArticleFunction
-  DeleteSongFunction:
+  FindArticlesFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src.handler.delete_song
+      Handler: src.handler.find_articles
       Runtime: python3.7
       Policies:
       - DynamoDBCrudPolicy:
@@ -132,48 +108,48 @@ Resources:
           Properties:
             RestApiId:
               Ref: DefaultApi
-            Path: /songs/{song_id}
+            Path: /articles
+            Method: GET
+      Environment:
+        Variables:
+          TABLE_NAME:
+            Ref: ArticleTable
+      CodeUri: FindArticlesFunction
+    Metadata:
+      SamResourceId: FindArticlesFunction
+  DeleteArticleFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.handler.delete_article
+      Runtime: python3.7
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: ArticleTable
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: DefaultApi
+            Path: /articles/{article_id}
             Method: DELETE
       Environment:
         Variables:
           TABLE_NAME:
             Ref: ArticleTable
-      CodeUri: DeleteSongFunction
+      CodeUri: DeleteArticleFunction
     Metadata:
-      SamResourceId: DeleteSongFunction
+      SamResourceId: DeleteArticleFunction
   ArticleTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName:
-        Fn::Sub: awesomecms-${StageName}
+        Fn::Sub: articles-${StageName}
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
       - AttributeName: uuid
         AttributeType: S
-      - AttributeName: author
-        AttributeType: S
-      - AttributeName: date
-        AttributeType: S
-      - AttributeName: title
-        AttributeType: S
       KeySchema:
-      - AttributeName: author
+      - AttributeName: uuid
         KeyType: HASH
-      - AttributeName: title
-        KeyType: RANGE
-      LocalSecondaryIndexes:
-      - IndexName: author-date
-        KeySchema:
-        - AttributeName: author
-          KeyType: HASH
-        - AttributeName: date
-          KeyType: RANGE
-        Projection:
-          ProjectionType: ALL
-      GlobalSecondaryIndexes:
-      - IndexName: uuid
-        KeySchema:
-        - AttributeName: uuid
-          KeyType: HASH
-        Projection:
-          ProjectionType: ALL

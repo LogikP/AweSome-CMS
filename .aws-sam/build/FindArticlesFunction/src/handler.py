@@ -18,7 +18,7 @@ def create_article(event, context):
 
     body = json.loads(event["body"])
 
-    article = Article(author_id="author_id", title=body["title"], tags=body["tags"], content=body["content"])
+    article = Article(author_id=None, title=body["title"], tags=body["tags"], content=body["content"])
 
     dao = ArticleDao(
         dynamodb_resource=resources_mgr.dynamodb_resource,
@@ -54,24 +54,27 @@ def delete_article(event, context):
     }
 
 
-def get_by_uuid(event, context):
+def find_articles(event, context):
     print(event)
-
+    
     dao = ArticleDao(
         dynamodb_resource=resources_mgr.dynamodb_resource,
         dynamodb_client=resources_mgr.dynamodb_client,
         table_name=resources_mgr.table_name(),
     )
     
-    article_id = event["queryStringParameters"]["article_id"]
-    entities = dao.get_by_uuid(article_id)
+    query_params = event.get("queryStringParameters")
+    
+    if query_params and "tag" in query_params:
+        articles = dao.find_by_tag(query_params.get("tag"))
+    else:
+        articles = dao.find_by_tag(None)
 
     return {
         "statusCode": 200,
         "headers": {"Content-Type": "application/json"},
-        "body": json.dumps(entities, default=lambda entity: entity.to_json()),
+        "body": json.dumps(articles),
     }
-
 
 def signup(event, context):
     return lambda_handler(json.loads(event["body"]))

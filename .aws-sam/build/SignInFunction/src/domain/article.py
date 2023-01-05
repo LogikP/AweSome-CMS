@@ -9,7 +9,8 @@ class Article:
         self.tags = tags
         self.author_id = author_id
         self.content = content
-        self.created_at = datetime.now()
+        # self.created_at = dateatime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        self.created_at = datetime.utcnow().isoformat()
         self.updated_at = None
 
         self.uuid = str(uuid.uuid4())

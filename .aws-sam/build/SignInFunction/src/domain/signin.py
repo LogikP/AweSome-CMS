@@ -60,14 +60,13 @@ def signin_function(body):
         return {
             "statusCode": 200,
             "headers": {},
-            "isBase64Encoded": True,
-            "body": {
-                "id_token": resp["AuthenticationResult"]["IdToken"]
-                    # "refresh_token": resp["AuthenticationResult"]["RefreshToken"],
-                    # "access_token": resp["AuthenticationResult"]["AccessToken"],
-                    # "expires_in": resp["AuthenticationResult"]["ExpiresIn"],
-                    # "token_type": resp["AuthenticationResult"]["TokenType"]
-            }
+            "body": json.dumps({
+                "id_token": resp["AuthenticationResult"]["IdToken"],
+                "refresh_token": resp["AuthenticationResult"]["RefreshToken"],
+                "access_token": resp["AuthenticationResult"]["AccessToken"],
+                "expires_in": resp["AuthenticationResult"]["ExpiresIn"],
+                "token_type": resp["AuthenticationResult"]["TokenType"]
+            })
         }
     #   return {'message': "success", 
     #           "error": False, 

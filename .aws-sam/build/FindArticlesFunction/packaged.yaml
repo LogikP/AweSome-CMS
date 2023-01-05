@@ -23,30 +23,6 @@ Resources:
               Fn::Sub: s3://${CicdBucket}/spec/api-spec.yaml
     Metadata:
       SamResourceId: DefaultApi
-  FindSongsFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: src.handler.find_by_author_and_title
-      Runtime: python3.7
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: ArticleTable
-      Events:
-        ApiEvent:
-          Type: Api
-          Properties:
-            RestApiId:
-              Ref: DefaultApi
-            Path: /songs
-            Method: GET
-      Environment:
-        Variables:
-          TABLE_NAME:
-            Ref: ArticleTable
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/c292a7f159b807c52caa3ef08269eb4b
-    Metadata:
-      SamResourceId: FindSongsFunction
   SignUpFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -60,7 +36,7 @@ Resources:
               Ref: DefaultApi
             Path: /users/signup
             Method: POST
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/c292a7f159b807c52caa3ef08269eb4b
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/8c30ca30fff875370cd8e4dae7dc5305
     Metadata:
       SamResourceId: SignUpFunction
   ConfirmedSignUpFunction:
@@ -76,7 +52,7 @@ Resources:
               Ref: DefaultApi
             Path: /users/confirmeAccount
             Method: POST
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/c292a7f159b807c52caa3ef08269eb4b
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/8c30ca30fff875370cd8e4dae7dc5305
     Metadata:
       SamResourceId: ConfirmedSignUpFunction
   SignInFunction:
@@ -92,7 +68,7 @@ Resources:
               Ref: DefaultApi
             Path: /users/signin
             Method: POST
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/c292a7f159b807c52caa3ef08269eb4b
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/8c30ca30fff875370cd8e4dae7dc5305
     Metadata:
       SamResourceId: SignInFunction
   CreateArticleFunction:
@@ -116,13 +92,13 @@ Resources:
         Variables:
           TABLE_NAME:
             Ref: ArticleTable
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/c292a7f159b807c52caa3ef08269eb4b
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/8c30ca30fff875370cd8e4dae7dc5305
     Metadata:
       SamResourceId: CreateArticleFunction
-  DeleteSongFunction:
+  FindArticlesFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src.handler.delete_song
+      Handler: src.handler.find_articles
       Runtime: python3.7
       Policies:
       - DynamoDBCrudPolicy:
@@ -134,50 +110,50 @@ Resources:
           Properties:
             RestApiId:
               Ref: DefaultApi
-            Path: /songs/{song_id}
+            Path: /articles
+            Method: GET
+      Environment:
+        Variables:
+          TABLE_NAME:
+            Ref: ArticleTable
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/8c30ca30fff875370cd8e4dae7dc5305
+    Metadata:
+      SamResourceId: FindArticlesFunction
+  DeleteArticleFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src.handler.delete_article
+      Runtime: python3.7
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: ArticleTable
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: DefaultApi
+            Path: /articles/{article_id}
             Method: DELETE
       Environment:
         Variables:
           TABLE_NAME:
             Ref: ArticleTable
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/c292a7f159b807c52caa3ef08269eb4b
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/8c30ca30fff875370cd8e4dae7dc5305
     Metadata:
-      SamResourceId: DeleteSongFunction
+      SamResourceId: DeleteArticleFunction
   ArticleTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName:
-        Fn::Sub: awesomecms-${StageName}
+        Fn::Sub: articles-${StageName}
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
       - AttributeName: uuid
         AttributeType: S
-      - AttributeName: author
-        AttributeType: S
-      - AttributeName: date
-        AttributeType: S
-      - AttributeName: title
-        AttributeType: S
       KeySchema:
-      - AttributeName: author
+      - AttributeName: uuid
         KeyType: HASH
-      - AttributeName: title
-        KeyType: RANGE
-      LocalSecondaryIndexes:
-      - IndexName: author-date
-        KeySchema:
-        - AttributeName: author
-          KeyType: HASH
-        - AttributeName: date
-          KeyType: RANGE
-        Projection:
-          ProjectionType: ALL
-      GlobalSecondaryIndexes:
-      - IndexName: uuid
-        KeySchema:
-        - AttributeName: uuid
-          KeyType: HASH
-        Projection:
-          ProjectionType: ALL
     Metadata:
       SamResourceId: ArticleTable
