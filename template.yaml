@@ -32,6 +32,7 @@ Resources:
     Properties:
       Handler: src.handler.signup
       Runtime: python3.7
+      CodeUri: deploy
       Events:
         ApiEvent:
           Type: Api
