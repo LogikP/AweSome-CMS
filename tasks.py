@@ -42,7 +42,7 @@ def stack_deploy(ctx):
         ctx.run(f"aws s3 cp spec/api-spec.yaml s3://s3-eu-west-1-cicd-awesomecms/spec/api-spec.yaml")
         ctx.run(f"sam package --s3-bucket s3-eu-west-1-cicd-awesomecms --output-template-file packaged.yaml")
         ctx.run(f"sam deploy packaged.yaml "
-                f"--capabilities CAPABILITY_AUTO_EXPAND "
+                f"--capabilities CAPABILITY_IAM "
                 f"--parameter-overrides "
                 f"StageName=awesomecms CicdBucket=s3-eu-west-1-cicd-awesomecms "
                 f"--s3-bucket s3-eu-west-1-cicd-awesomecms "
