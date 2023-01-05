@@ -36,7 +36,7 @@ Resources:
               Ref: DefaultApi
             Path: /users/signup
             Method: POST
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/0f2501ebbae540ce2276941ee742623c
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/95a5b9dbed5f690b93766230414ae592
     Metadata:
       SamResourceId: SignUpFunction
   ConfirmedSignUpFunction:
@@ -52,7 +52,7 @@ Resources:
               Ref: DefaultApi
             Path: /users/confirmeAccount
             Method: POST
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/0f2501ebbae540ce2276941ee742623c
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/95a5b9dbed5f690b93766230414ae592
     Metadata:
       SamResourceId: ConfirmedSignUpFunction
   SignInFunction:
@@ -68,7 +68,7 @@ Resources:
               Ref: DefaultApi
             Path: /users/signin
             Method: POST
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/0f2501ebbae540ce2276941ee742623c
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/95a5b9dbed5f690b93766230414ae592
     Metadata:
       SamResourceId: SignInFunction
   CreateArticleFunction:
@@ -92,7 +92,7 @@ Resources:
         Variables:
           TABLE_NAME:
             Ref: ArticleTable
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/0f2501ebbae540ce2276941ee742623c
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/95a5b9dbed5f690b93766230414ae592
     Metadata:
       SamResourceId: CreateArticleFunction
   FindArticlesFunction:
@@ -116,7 +116,7 @@ Resources:
         Variables:
           TABLE_NAME:
             Ref: ArticleTable
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/0f2501ebbae540ce2276941ee742623c
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/95a5b9dbed5f690b93766230414ae592
     Metadata:
       SamResourceId: FindArticlesFunction
   DeleteArticleFunction:
@@ -140,44 +140,20 @@ Resources:
         Variables:
           TABLE_NAME:
             Ref: ArticleTable
-      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/0f2501ebbae540ce2276941ee742623c
+      CodeUri: s3://s3-eu-west-1-cicd-awesomecms/95a5b9dbed5f690b93766230414ae592
     Metadata:
       SamResourceId: DeleteArticleFunction
   ArticleTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName:
-        Fn::Sub: awesomecms-${StageName}
+        Fn::Sub: articles-${StageName}
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
       - AttributeName: uuid
         AttributeType: S
-      - AttributeName: author
-        AttributeType: S
-      - AttributeName: date
-        AttributeType: S
-      - AttributeName: title
-        AttributeType: S
       KeySchema:
-      - AttributeName: author
+      - AttributeName: uuid
         KeyType: HASH
-      - AttributeName: title
-        KeyType: RANGE
-      LocalSecondaryIndexes:
-      - IndexName: author-date
-        KeySchema:
-        - AttributeName: author
-          KeyType: HASH
-        - AttributeName: date
-          KeyType: RANGE
-        Projection:
-          ProjectionType: ALL
-      GlobalSecondaryIndexes:
-      - IndexName: uuid
-        KeySchema:
-        - AttributeName: uuid
-          KeyType: HASH
-        Projection:
-          ProjectionType: ALL
     Metadata:
       SamResourceId: ArticleTable
